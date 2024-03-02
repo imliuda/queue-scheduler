@@ -25,17 +25,17 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +kubebuilder:resource:shortName={queue,queues},scope=Cluster
 
-type Queue struct {
+type QueueConfig struct {
 	metav1.TypeMeta `json:",inline"`
 
 	metav1.ObjectMeta `json:"metadata"`
 
 	// QueueSpec defines the queue config
-	Queues []Queues `json:"queues"`
+	Queues []Queue `json:"queues"`
 }
 
-// Queues defines the the queues
-type Queues struct {
+// Queue defines the the queues
+type Queue struct {
 	// Name is the queue name in current level
 	Name string `json:"name"`
 	// Min is the lower limit of desired guaranteed resources
@@ -54,7 +54,7 @@ type Queues struct {
 	// +optional
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
-	Queues []Queues `json:"queues"`
+	Queues []Queue `json:"queues"`
 
 	// Properties define queue custom configs
 	// +optional
@@ -63,13 +63,13 @@ type Queues struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// QueueList is a list of Queue items
-type QueueList struct {
+// QueueConfigList is a list of QueueConfig items
+type QueueConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 
 	// +optional
 	metav1.ListMeta `json:"metadata,omitempty"`
 
-	// Items is a list of Queue objects.
-	Items []Queue `json:"items"`
+	// Items is a list of QueueConfig objects.
+	Items []QueueConfig `json:"items"`
 }

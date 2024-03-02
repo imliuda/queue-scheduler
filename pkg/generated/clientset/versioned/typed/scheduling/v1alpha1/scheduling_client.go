@@ -27,7 +27,7 @@ import (
 
 type SchedulingV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	QueuesGetter
+	QueueConfigsGetter
 }
 
 // SchedulingV1alpha1Client is used to interact with features provided by the scheduling.queue-scheduler.imliuda.github.io group.
@@ -35,8 +35,8 @@ type SchedulingV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *SchedulingV1alpha1Client) Queues(namespace string) QueueInterface {
-	return newQueues(c, namespace)
+func (c *SchedulingV1alpha1Client) QueueConfigs(namespace string) QueueConfigInterface {
+	return newQueueConfigs(c, namespace)
 }
 
 // NewForConfig creates a new SchedulingV1alpha1Client for the given config.

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"github.com/imliuda/queue-scheduler/api/scheduling/v1alpha1"
 	v1 "k8s.io/api/core/v1"
+	"sync"
 )
+
+var queueMu = sync.Mutex{}
 
 type Queue struct {
 	Name       string
@@ -23,7 +26,7 @@ func New() *Queue {
 	}
 }
 
-func addToRoot(root *Queue, children []v1alpha1.Queues) {
+func addToRoot(root *Queue, children []v1alpha1.Queue) {
 	if len(children) == 0 {
 		return
 	}
@@ -46,9 +49,7 @@ func addToRoot(root *Queue, children []v1alpha1.Queues) {
 	}
 }
 
-func FromConfig(queue *v1alpha1.Queue) *Queue {
-	queue = queue.DeepCopy()
-
+func FromConfig(queue *v1alpha1.QueueConfig) *Queue {
 	var root *Queue
 
 	if len(queue.Queues) == 1 && queue.Queues[0].Name == "root" {
@@ -75,4 +76,30 @@ func FromConfig(queue *v1alpha1.Queue) *Queue {
 	addToRoot(root, queue.Queues)
 
 	return root
+}
+
+func updateQueues(currents []*Queue, updates []v1alpha1.Queue) {
+	//currentNameToQueues := make(map[string]*Queue)
+	//updateNameToQueues := make(map[string]v1alpha1.Queue)
+}
+
+func (q *Queue) Update(queue *v1alpha1.QueueConfig) {
+	queueMu.Lock()
+	defer queueMu.Unlock()
+
+	if len(queue.Queues) == 1 && queue.Queues[0].Name == "root" {
+		cq := queue.Queues[0]
+		q.Min = cq.Min
+		q.Max = cq.Max
+		q.Weight = cq.Weight
+		q.Properties = cq.Properties
+	} else {
+		updateQueues(q.Queues, queue.Queues)
+	}
+}
+
+func (q *Queue) UpdateState(state *States) {
+	queueMu.Lock()
+	defer queueMu.Unlock()
+
 }

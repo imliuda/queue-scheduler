@@ -52,8 +52,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=scheduling.queue-scheduler.imliuda.github.io, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("queues"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Scheduling().V1alpha1().Queues().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("queueconfigs"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Scheduling().V1alpha1().QueueConfigs().Informer()}, nil
 
 	}
 

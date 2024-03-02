@@ -45,8 +45,8 @@ func init() {
 var _ framework.PreFilterPlugin = &HierarchyQueue{}
 
 type HierarchyQueue struct {
-	handle framework.Handle
-	queue  *queue.Queue
+	handle      framework.Handle
+	queueStates *queue.States
 }
 
 func New(ctx context.Context, configuration runtime.Object, f framework.Handle) (framework.Plugin, error) {

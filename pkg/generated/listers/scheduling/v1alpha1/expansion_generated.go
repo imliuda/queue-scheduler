@@ -17,10 +17,10 @@ limitations under the License.
 
 package v1alpha1
 
-// QueueListerExpansion allows custom methods to be added to
-// QueueLister.
-type QueueListerExpansion interface{}
+// QueueConfigListerExpansion allows custom methods to be added to
+// QueueConfigLister.
+type QueueConfigListerExpansion interface{}
 
-// QueueNamespaceListerExpansion allows custom methods to be added to
-// QueueNamespaceLister.
-type QueueNamespaceListerExpansion interface{}
+// QueueConfigNamespaceListerExpansion allows custom methods to be added to
+// QueueConfigNamespaceLister.
+type QueueConfigNamespaceListerExpansion interface{}

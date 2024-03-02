@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// QueueInformer provides access to a shared informer and lister for
-// Queues.
-type QueueInformer interface {
+// QueueConfigInformer provides access to a shared informer and lister for
+// QueueConfigs.
+type QueueConfigInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.QueueLister
+	Lister() v1alpha1.QueueConfigLister
 }
 
-type queueInformer struct {
+type queueConfigInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewQueueInformer constructs a new informer for Queue type.
+// NewQueueConfigInformer constructs a new informer for QueueConfig type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewQueueInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredQueueInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewQueueConfigInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredQueueConfigInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredQueueInformer constructs a new informer for Queue type.
+// NewFilteredQueueConfigInformer constructs a new informer for QueueConfig type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredQueueInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredQueueConfigInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SchedulingV1alpha1().Queues(namespace).List(context.TODO(), options)
+				return client.SchedulingV1alpha1().QueueConfigs(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SchedulingV1alpha1().Queues(namespace).Watch(context.TODO(), options)
+				return client.SchedulingV1alpha1().QueueConfigs(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&schedulingv1alpha1.Queue{},
+		&schedulingv1alpha1.QueueConfig{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *queueInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredQueueInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *queueConfigInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredQueueConfigInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *queueInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&schedulingv1alpha1.Queue{}, f.defaultInformer)
+func (f *queueConfigInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&schedulingv1alpha1.QueueConfig{}, f.defaultInformer)
 }
 
-func (f *queueInformer) Lister() v1alpha1.QueueLister {
-	return v1alpha1.NewQueueLister(f.Informer().GetIndexer())
+func (f *queueConfigInformer) Lister() v1alpha1.QueueConfigLister {
+	return v1alpha1.NewQueueConfigLister(f.Informer().GetIndexer())
 }

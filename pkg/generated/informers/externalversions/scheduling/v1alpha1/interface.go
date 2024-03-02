@@ -23,8 +23,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Queues returns a QueueInformer.
-	Queues() QueueInformer
+	// QueueConfigs returns a QueueConfigInformer.
+	QueueConfigs() QueueConfigInformer
 }
 
 type version struct {
@@ -38,7 +38,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Queues returns a QueueInformer.
-func (v *version) Queues() QueueInformer {
-	return &queueInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// QueueConfigs returns a QueueConfigInformer.
+func (v *version) QueueConfigs() QueueConfigInformer {
+	return &queueConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

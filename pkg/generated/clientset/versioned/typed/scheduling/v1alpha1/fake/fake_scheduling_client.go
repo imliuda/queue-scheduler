@@ -27,8 +27,8 @@ type FakeSchedulingV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeSchedulingV1alpha1) Queues(namespace string) v1alpha1.QueueInterface {
-	return &FakeQueues{c, namespace}
+func (c *FakeSchedulingV1alpha1) QueueConfigs(namespace string) v1alpha1.QueueConfigInterface {
+	return &FakeQueueConfigs{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

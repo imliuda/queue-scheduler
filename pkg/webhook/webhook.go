@@ -37,7 +37,7 @@ type QueueWebhook struct {
 }
 
 //
-//func (w *QueueWebhook) validateQueue(ctx context.Context, q *v1alpha1.Queue) (warnings admission.Warnings, err error) {
+//func (w *QueueWebhook) validateQueue(ctx context.Context, q *v1alpha1.QueueConfig) (warnings admission.Warnings, err error) {
 //	// validate min/max
 //	// if a resource in max is unspecified, then it can use as much as possible
 //	if !utils.LessOrEqual(q.Spec.Min, q.Spec.Max, true) {
@@ -53,7 +53,7 @@ type QueueWebhook struct {
 //	}
 //
 //	if parentName != "" {
-//		parentQueue := &v1alpha1.Queue{}
+//		parentQueue := &v1alpha1.QueueConfig{}
 //		err = w.Client.Get(ctx, types.NamespacedName{Namespace: "", Name: parentName}, parentQueue)
 //		if err != nil {
 //			return nil, fmt.Errorf("get parent queue [%s] error", parentName)
@@ -64,7 +64,7 @@ type QueueWebhook struct {
 //			return nil, fmt.Errorf("max resource of queue [%s] is larger then parent", name)
 //		}
 //
-//		siblingQueues := &v1alpha1.QueueList{}
+//		siblingQueues := &v1alpha1.QueueConfigList{}
 //		if err = w.Client.List(ctx, siblingQueues, &client.ListOptions{
 //			LabelSelector: labels.SelectorFromSet(labels.Set{"parent": parentName}),
 //		}); err != nil {
@@ -92,7 +92,7 @@ type QueueWebhook struct {
 //}
 //
 //func (w *QueueWebhook) ValidateCreate(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error) {
-//	q := obj.(*v1alpha1.Queue)
+//	q := obj.(*v1alpha1.QueueConfig)
 //
 //	if q.ObjectMeta.Labels == nil || q.Labels["parent"] != q.ObjectMeta.Name {
 //		return nil, fmt.Errorf("queue [%s] has empty labels, can check parent queue", q.ObjectMeta.Name)
@@ -106,7 +106,7 @@ type QueueWebhook struct {
 //}
 //
 //func (w *QueueWebhook) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (warnings admission.Warnings, err error) {
-//	newQ := oldObj.(*v1alpha1.Queue)
+//	newQ := oldObj.(*v1alpha1.QueueConfig)
 //
 //	if newQ.Labels == nil || newQ.Labels["parent"] != newQ.ObjectMeta.Name {
 //		return nil, fmt.Errorf("can't modify parent label")
@@ -116,9 +116,9 @@ type QueueWebhook struct {
 //}
 //
 //func (w *QueueWebhook) ValidateDelete(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error) {
-//	q := obj.(*v1alpha1.Queue)
+//	q := obj.(*v1alpha1.QueueConfig)
 //
-//	childQueues := &v1alpha1.QueueList{}
+//	childQueues := &v1alpha1.QueueConfigList{}
 //	if err = w.Client.List(ctx, childQueues, &client.ListOptions{
 //		LabelSelector: labels.SelectorFromSet(labels.Set{"parent": q.ObjectMeta.Name}),
 //	}); err != nil {
@@ -132,7 +132,7 @@ type QueueWebhook struct {
 //}
 //
 //func (w *QueueWebhook) Default(ctx context.Context, obj runtime.Object) error {
-//	q := obj.(*v1alpha1.Queue)
+//	q := obj.(*v1alpha1.QueueConfig)
 //
 //	if q.Spec.Weight == 0 {
 //		q.Spec.Weight = 1
@@ -156,7 +156,7 @@ type QueueConfigValidator struct {
 }
 
 func (q QueueConfigValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error) {
-	newQ := obj.(*v1alpha1.Queue)
+	newQ := obj.(*v1alpha1.QueueConfig)
 	root := queue.FromConfig(newQ)
 	if root.Validate() != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func (q QueueConfigValidator) ValidateCreate(ctx context.Context, obj runtime.Ob
 }
 
 func (q QueueConfigValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (warnings admission.Warnings, err error) {
-	newQ := newObj.(*v1alpha1.Queue)
+	newQ := newObj.(*v1alpha1.QueueConfig)
 	root := queue.FromConfig(newQ)
 	if root.Validate() != nil {
 		return nil, err
@@ -226,8 +226,8 @@ func Setup(ctx context.Context, schema *runtime.Scheme, args *config.HierarchyQu
 	})
 
 	validator := &QueueConfigValidator{}
-	webhookServer.Register("/validate-scheduling-queue-scheduler-imliuda-github-io-v1alpha1-queueconfig",
-		admission.WithCustomValidator(schema, &v1alpha1.Queue{}, validator))
+	webhookServer.Register("/valiadate-v1alpha1-queues.scheduling.queue-scheduler.imliuda.github.com",
+		admission.WithCustomValidator(schema, &v1alpha1.QueueConfig{}, validator))
 
 	go func() {
 		if err := webhookServer.Start(ctx); err != nil {
