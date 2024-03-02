@@ -1,0 +1,395 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: queue-scheduler
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: queue-scheduler
+rules:
+  - apiGroups:
+      - scheduling.queue-scheduler.imliuda.github.io
+    resources:
+      - queues
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - scheduling.queue-scheduler.imliuda.github.io
+    resources:
+      - queues/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - scheduling.queue-scheduler.imliuda.github.io
+    resources:
+      - queues/status
+    verbs:
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: queue-scheduler-queue-scheduler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:queue-scheduler
+subjects:
+  - kind: ServiceAccount
+    name: queue-scheduler
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: queue-scheduler-system:kube-scheduler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:kube-scheduler
+subjects:
+  - kind: ServiceAccount
+    name: queue-scheduler
+    namespace: kube-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: queue-scheduler
+  namespace: kube-system
+spec:
+  ports:
+    - port: 9443
+      protocol: TCP
+      targetPort: 9443
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    control-plane: queue-scheduler
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: queue-scheduler-secret
+  namespace: kube-system
+stringData:
+  key:
+    "-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDP4xkURyugEbaO
+Pz6Ca8YJxPLlAFzG1+cTIVZxIyWA2C+IXeV8YCWoj1ur32r/6/QOSQZ7XghM4JZi
+i6DA6nIrdxEXG5GZSKDp6EGlImc6MVptP4Nsc3LcebsfrE8fFarT5I+Y8eVueyGz
+77XMcgpsGQ3YHwG3IU9iK/pvvRoCSlbXjSKR+LvRXBDdJVO4rnp1GMPF1tyq4nnx
+EMevY3jmbM4TDTc2zUxvMRBz9v2wesMHruymp30QV0SylLEKRM+4O7V+uNyqNv+u
+ekzGHgNY5W0GQOSMnLloAB1z+fSz4Q7Mq2ATxCpEqd+odtvSHzNKNAw3w4K1vnn7
+KJfBwdwXAgMBAAECggEAINA3TrCXLbpuBtDrxHlPdo5MSqI+grJkimv6MXx7OHWn
+Nw6fIP0qJIuQTDZFNOUhDjovmDx08fGHO0HP23OGFt9B5tRWrIu+vn0HE5I1GgXd
+QJ5EV9N3P17Fjw/LI1xvrOeIVPtlnAU6giTlnMIpa/ueaE0on6fV2GiZrJZ8Kv0Z
+Ek4+1fmSIYFKXckEiO6NtyoNKMmMOPF+EFWAgyH+aJFBWR6D0YjzgWqt8lubhOid
+nN4IvgtDwIM6wqx3RuHFXLqA4FqRmE9Csd2ru8mDQc77w1XHdRPjcOlEbL2ThTUX
+5uojVEQ3/awfAAHm6qYW0Z20ECLZcakYr40qqj5OKQKBgQDtFvsQFtQSMXjYdabD
+P6D7960UCdKCAKSu2LuFJ8NFV4EmZWLQ7nJGGriIRFYAY879sS0a3v2DiyNaSdOp
+vu0NiGubRmeK/GYkYBcuSCnRhv6jhHCRTCct7kDOwOyZXXYQ63MUvzM3dBqrOwYp
++9ZV3MumxqnHyA/37tV6/Ji4mQKBgQDgd9elad8ud40aNeQYX+6OX1VhiVdrMk9W
+z6LCpN1gRoFkO3jOpDL1JWiybdSKm2bS7LhyXTzE7NVMpYc1EYgVksTW+OqBzatd
+OijS85KKQmXAjZFZG60HNJXcCCvG/oye7HEe6TkTiJQjPLovIdN56a0zvZKCFVN6
+cm+wuZq4LwKBgBw6fzwEK83avBOxtmBK5CT78UyQetLltrXmsjUBbfuElqj2q1RK
+/6ofJld7I246c/u6q68mW7LczyHB5oSwadMRqhY7xLpEoPi1xCzLhMcgtpLLgweZ
+tJSAaJD1YXZFLXiIQBR5S2TP2xkGFw7KoFNqzYiW4MIbrOMNObfB+YEJAoGAQ7ol
+KNW+70hHHMdx4SDg27hMDLfh1ohBhBH2LACOgwQC+nkvRDoq3ejBpESbQo8NAUtH
+g8o6EbjbytqO5yY5BzlXhv1n1G537BMmSjAP4QOTq/uLBXXiSTBGnzMf8lTPnQv+
+PbNk803cVJ14F8x/AGPPTLNAR1uj6mgo5wu5cSUCgYEAxVH2ob3RBwM62M01QXyC
+iXHaqTcs2/UeSIIvmCexWqEz7eSdk91e+H4HbljUrUk/g2iEa0mk0b06Ii09gLMw
+9Tsjxgon+Zu0ETwSMeomMDFxUEYB1JePJD36vBRLnIexaYomUb8CvO/u5Amly1A5
+tF85E6F+8TTHE8YZx5RJVyk=
+-----END PRIVATE KEY-----"
+  cert:
+    "-----BEGIN CERTIFICATE-----
+MIIDkjCCAnoCAQEwDQYJKoZIhvcNAQELBQAwgY0xCzAJBgNVBAYTAkNDMRIwEAYD
+VQQIDAlTdGF0ZU5hbWUxETAPBgNVBAcMCENpdHlOYW1lMRQwEgYDVQQKDAtDb21w
+YW55TmFtZTEbMBkGA1UECwwSQ29tcGFueVNlY3Rpb25OYW1lMSQwIgYDVQQDDBtx
+dWV1ZS1zY2hlZHVsZXIua3ViZS1zeXN0ZW0wIBcNMjQwMjI4MDUyMjAzWhgPMzAy
+MzA3MDEwNTIyMDNaMIGNMQswCQYDVQQGEwJDQzESMBAGA1UECAwJU3RhdGVOYW1l
+MREwDwYDVQQHDAhDaXR5TmFtZTEUMBIGA1UECgwLQ29tcGFueU5hbWUxGzAZBgNV
+BAsMEkNvbXBhbnlTZWN0aW9uTmFtZTEkMCIGA1UEAwwbcXVldWUtc2NoZWR1bGVy
+Lmt1YmUtc3lzdGVtMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz+MZ
+FEcroBG2jj8+gmvGCcTy5QBcxtfnEyFWcSMlgNgviF3lfGAlqI9bq99q/+v0DkkG
+e14ITOCWYougwOpyK3cRFxuRmUig6ehBpSJnOjFabT+DbHNy3Hm7H6xPHxWq0+SP
+mPHlbnshs++1zHIKbBkN2B8BtyFPYiv6b70aAkpW140ikfi70VwQ3SVTuK56dRjD
+xdbcquJ58RDHr2N45mzOEw03Ns1MbzEQc/b9sHrDB67spqd9EFdEspSxCkTPuDu1
+frjcqjb/rnpMxh4DWOVtBkDkjJy5aAAdc/n0s+EOzKtgE8QqRKnfqHbb0h8zSjQM
+N8OCtb55+yiXwcHcFwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQABN29B8DlMZUCw
+l3ITtong3j8LDCElqVR/nLuVTQE2hJCN/gUXIDecLwMxzMoRp76n9QF+6gHYdr/q
+xKtVULP/Uoxrng80arqXuaKWskHwZ8SVDp+ZoupWgw3GvnY/1AqbmgJzItdph13y
+bZ5QsTl1nFuGnMjcmpPF09SmXmLUULC7wIPFZgKukpOOXvr2/MeIHrEIdMlqQsi3
+tmegmmVao69LNx/2gsFhtGGKQ1HNtAbDigJ0Dpw6a6fdqEhr7NnjtjfhkaXdZBfm
+m5LVBg1awrddDdl+9judagQsfPtWY5lfiDJJnYkPVJWKIH1o4ql+MgpLWLrFoJw1
+UoyUNZJ1
+-----END CERTIFICATE-----"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: queue-scheduler-mutating-webhook
+webhooks:
+  - admissionReviewVersions:
+      - v1alpha1
+    clientConfig:
+      caBundle:
+        -----BEGIN CERTIFICATE-----
+        MIID/zCCAuegAwIBAgIULc0uJa4aFcZ43Rs6xv+2o4EDK9swDQYJKoZIhvcNAQEL
+        BQAwgY0xCzAJBgNVBAYTAkNDMRIwEAYDVQQIDAlTdGF0ZU5hbWUxETAPBgNVBAcM
+        CENpdHlOYW1lMRQwEgYDVQQKDAtDb21wYW55TmFtZTEbMBkGA1UECwwSQ29tcGFu
+        eVNlY3Rpb25OYW1lMSQwIgYDVQQDDBtxdWV1ZS1zY2hlZHVsZXIua3ViZS1zeXN0
+        ZW0wIBcNMjQwMjI4MDUyMjAzWhgPMjEyNDAyMDQwNTIyMDNaMIGNMQswCQYDVQQG
+        EwJDQzESMBAGA1UECAwJU3RhdGVOYW1lMREwDwYDVQQHDAhDaXR5TmFtZTEUMBIG
+        A1UECgwLQ29tcGFueU5hbWUxGzAZBgNVBAsMEkNvbXBhbnlTZWN0aW9uTmFtZTEk
+        MCIGA1UEAwwbcXVldWUtc2NoZWR1bGVyLmt1YmUtc3lzdGVtMIIBIjANBgkqhkiG
+        9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq3fn9rTDsVeHI9OZnc6Sj2Tcqez93UG7qEr7
+        Q+bOxuTTxhYkDcAhXJa+vw3DhWW/GNWe2vIXHMYips5chIWR7WWeefYp0xgnwizs
+        Ck/pfi4gIi5hRCrPww2ucBANEbqDPqWy3pY+yrDjA4e5z9w8KwfmlZrOQcGv0Ryh
+        xjf4YW2pOK5UwWALMwRn9x80KgYiUS8E839ytUD9x4iP9TlZkWWIk/mxSvcuW7//
+        UDnihR4jXc1yYhPIL0o3naYnziiyPyStUEbHG72C7ulqGp/GHrTMnsTJiPemBKWV
+        YfA7v9HRHJtMPTye5JBlSdV+sUkGYrI2K607yFFQKtL07/hyOQIDAQABo1MwUTAd
+        BgNVHQ4EFgQUoz4OC0vpvRowFvi9VsUexAFd1sQwHwYDVR0jBBgwFoAUoz4OC0vp
+        vRowFvi9VsUexAFd1sQwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOC
+        AQEAOKDoZeOc3pwemC5SMb/G0L9qqMIq0xYT5NiTKZouSal3jKzN3bib5508oIaU
+        la1ma0m6wEkNJc09S0D6OF5FvgJcxQ7DmSvfXG7iZJ+k6yed51vW6O+YgQZJxNxI
+        bYcZHtxIEH3Grb+XrR9JEsVJQKJBFooI09AsCHanED3NnkiRC3rsYDlLTQQ8iu+L
+        kwnPRVC9QEAvxPNG7lwNOAzwrLnD7Ok7l59nLIeFF0wuHWuLBiuJTDswSkizkyCx
+        67NpZjfNc/yZgROuTNDr7Tf//x9gFzaV86uCKW5y3DeSTkkou7nrpedVuwzeU2Dp
+        W41Q5IWw8Wbc3ZjGVuX75nzlIQ==
+        -----END CERTIFICATE-----
+      service:
+        name: queue-scheduler
+        namespace: kube-system
+        path: /mutate-v1alpha1-queues.scheduling.queue-scheduler.imliuda.github.com
+    failurePolicy: Fail
+    name: mpod.kb.io
+    rules:
+      - apiGroups:
+          - scheduling.queue-scheduler.imliuda.github.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - queues
+    sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: queue-scheduler-validating-webhook
+webhooks:
+  - admissionReviewVersions:
+      - v1alpha1
+    clientConfig:
+      caBundle:
+        -----BEGIN CERTIFICATE-----
+        MIID/zCCAuegAwIBAgIULc0uJa4aFcZ43Rs6xv+2o4EDK9swDQYJKoZIhvcNAQEL
+        BQAwgY0xCzAJBgNVBAYTAkNDMRIwEAYDVQQIDAlTdGF0ZU5hbWUxETAPBgNVBAcM
+        CENpdHlOYW1lMRQwEgYDVQQKDAtDb21wYW55TmFtZTEbMBkGA1UECwwSQ29tcGFu
+        eVNlY3Rpb25OYW1lMSQwIgYDVQQDDBtxdWV1ZS1zY2hlZHVsZXIua3ViZS1zeXN0
+        ZW0wIBcNMjQwMjI4MDUyMjAzWhgPMjEyNDAyMDQwNTIyMDNaMIGNMQswCQYDVQQG
+        EwJDQzESMBAGA1UECAwJU3RhdGVOYW1lMREwDwYDVQQHDAhDaXR5TmFtZTEUMBIG
+        A1UECgwLQ29tcGFueU5hbWUxGzAZBgNVBAsMEkNvbXBhbnlTZWN0aW9uTmFtZTEk
+        MCIGA1UEAwwbcXVldWUtc2NoZWR1bGVyLmt1YmUtc3lzdGVtMIIBIjANBgkqhkiG
+        9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq3fn9rTDsVeHI9OZnc6Sj2Tcqez93UG7qEr7
+        Q+bOxuTTxhYkDcAhXJa+vw3DhWW/GNWe2vIXHMYips5chIWR7WWeefYp0xgnwizs
+        Ck/pfi4gIi5hRCrPww2ucBANEbqDPqWy3pY+yrDjA4e5z9w8KwfmlZrOQcGv0Ryh
+        xjf4YW2pOK5UwWALMwRn9x80KgYiUS8E839ytUD9x4iP9TlZkWWIk/mxSvcuW7//
+        UDnihR4jXc1yYhPIL0o3naYnziiyPyStUEbHG72C7ulqGp/GHrTMnsTJiPemBKWV
+        YfA7v9HRHJtMPTye5JBlSdV+sUkGYrI2K607yFFQKtL07/hyOQIDAQABo1MwUTAd
+        BgNVHQ4EFgQUoz4OC0vpvRowFvi9VsUexAFd1sQwHwYDVR0jBBgwFoAUoz4OC0vp
+        vRowFvi9VsUexAFd1sQwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOC
+        AQEAOKDoZeOc3pwemC5SMb/G0L9qqMIq0xYT5NiTKZouSal3jKzN3bib5508oIaU
+        la1ma0m6wEkNJc09S0D6OF5FvgJcxQ7DmSvfXG7iZJ+k6yed51vW6O+YgQZJxNxI
+        bYcZHtxIEH3Grb+XrR9JEsVJQKJBFooI09AsCHanED3NnkiRC3rsYDlLTQQ8iu+L
+        kwnPRVC9QEAvxPNG7lwNOAzwrLnD7Ok7l59nLIeFF0wuHWuLBiuJTDswSkizkyCx
+        67NpZjfNc/yZgROuTNDr7Tf//x9gFzaV86uCKW5y3DeSTkkou7nrpedVuwzeU2Dp
+        W41Q5IWw8Wbc3ZjGVuX75nzlIQ==
+        -----END CERTIFICATE-----
+      service:
+        name: queue-scheduler
+        namespace: kube-system
+        path: /valiadate-v1alpha1-queues.scheduling.queue-scheduler.imliuda.github.com
+    failurePolicy: Fail
+    name: mpod.kb.io
+    rules:
+      - apiGroups:
+          - scheduling.queue-scheduler.imliuda.github.com
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+          - DELETE
+        resources:
+          - queues
+    sideEffects: None
+---
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: queues.scheduling.queue-scheduler.imliuda.github.io
+spec:
+  group: scheduling.queue-scheduler.imliuda.github.io
+  names:
+    kind: Queue
+    listKind: QueueList
+    plural: queues
+    shortNames:
+      - queue
+      - queues
+    singular: queue
+  scope: Cluster
+  conversion:
+    strategy: Webhook
+    webhook:
+      clientConfig:
+        caBundle:
+          -----BEGIN CERTIFICATE-----
+          MIID/zCCAuegAwIBAgIULc0uJa4aFcZ43Rs6xv+2o4EDK9swDQYJKoZIhvcNAQEL
+          BQAwgY0xCzAJBgNVBAYTAkNDMRIwEAYDVQQIDAlTdGF0ZU5hbWUxETAPBgNVBAcM
+          CENpdHlOYW1lMRQwEgYDVQQKDAtDb21wYW55TmFtZTEbMBkGA1UECwwSQ29tcGFu
+          eVNlY3Rpb25OYW1lMSQwIgYDVQQDDBtxdWV1ZS1zY2hlZHVsZXIua3ViZS1zeXN0
+          ZW0wIBcNMjQwMjI4MDUyMjAzWhgPMjEyNDAyMDQwNTIyMDNaMIGNMQswCQYDVQQG
+          EwJDQzESMBAGA1UECAwJU3RhdGVOYW1lMREwDwYDVQQHDAhDaXR5TmFtZTEUMBIG
+          A1UECgwLQ29tcGFueU5hbWUxGzAZBgNVBAsMEkNvbXBhbnlTZWN0aW9uTmFtZTEk
+          MCIGA1UEAwwbcXVldWUtc2NoZWR1bGVyLmt1YmUtc3lzdGVtMIIBIjANBgkqhkiG
+          9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq3fn9rTDsVeHI9OZnc6Sj2Tcqez93UG7qEr7
+          Q+bOxuTTxhYkDcAhXJa+vw3DhWW/GNWe2vIXHMYips5chIWR7WWeefYp0xgnwizs
+          Ck/pfi4gIi5hRCrPww2ucBANEbqDPqWy3pY+yrDjA4e5z9w8KwfmlZrOQcGv0Ryh
+          xjf4YW2pOK5UwWALMwRn9x80KgYiUS8E839ytUD9x4iP9TlZkWWIk/mxSvcuW7//
+          UDnihR4jXc1yYhPIL0o3naYnziiyPyStUEbHG72C7ulqGp/GHrTMnsTJiPemBKWV
+          YfA7v9HRHJtMPTye5JBlSdV+sUkGYrI2K607yFFQKtL07/hyOQIDAQABo1MwUTAd
+          BgNVHQ4EFgQUoz4OC0vpvRowFvi9VsUexAFd1sQwHwYDVR0jBBgwFoAUoz4OC0vp
+          vRowFvi9VsUexAFd1sQwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOC
+          AQEAOKDoZeOc3pwemC5SMb/G0L9qqMIq0xYT5NiTKZouSal3jKzN3bib5508oIaU
+          la1ma0m6wEkNJc09S0D6OF5FvgJcxQ7DmSvfXG7iZJ+k6yed51vW6O+YgQZJxNxI
+          bYcZHtxIEH3Grb+XrR9JEsVJQKJBFooI09AsCHanED3NnkiRC3rsYDlLTQQ8iu+L
+          kwnPRVC9QEAvxPNG7lwNOAzwrLnD7Ok7l59nLIeFF0wuHWuLBiuJTDswSkizkyCx
+          67NpZjfNc/yZgROuTNDr7Tf//x9gFzaV86uCKW5y3DeSTkkou7nrpedVuwzeU2Dp
+          W41Q5IWw8Wbc3ZjGVuX75nzlIQ==
+          -----END CERTIFICATE-----
+        service:
+          namespace: kube-system
+          name: queue-scheduler
+          path: /convert
+          port: 9443
+      conversionReviewVersions:
+        - v1
+  versions:
+    - name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          properties:
+            apiVersion:
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+              type: string
+            kind:
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: QueueSpec defines the queue config
+              properties:
+                max:
+                  additionalProperties:
+                    anyOf:
+                      - type: integer
+                      - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: Guarantee is the upper limit of desired guaranteed resources
+                  type: object
+                min:
+                  additionalProperties:
+                    anyOf:
+                      - type: integer
+                      - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: Min is the lower limit of desired guaranteed resources
+                  type: object
+                weight:
+                  description: Weight is the weight through same level queue
+                  type: integer
+              type: object
+            status:
+              description: QueueStatus defines the observed status
+              properties:
+                used:
+                  additionalProperties:
+                    anyOf:
+                      - type: integer
+                      - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  description: ResourceList is a set of (resource name, quantity) pairs.
+                  type: object
+              type: object
+          required:
+            - spec
+          type: object
+      served: true
+      storage: true
+      subresources:
+        status: {}
