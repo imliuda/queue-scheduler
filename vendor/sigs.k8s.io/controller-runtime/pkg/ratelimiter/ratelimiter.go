@@ -14,24 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package ratelimiter
 
-import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
-	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
+import "time"
 
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
+// RateLimiter is an identical interface of client-go workqueue RateLimiter.
+type RateLimiter interface {
+	// When gets an item and gets to decide how long that item should wait
+	When(item interface{}) time.Duration
+	// Forget indicates that an item is finished being retried.  Doesn't matter whether its for perm failing
+	// or for success, we'll stop tracking it
+	Forget(item interface{})
+	// NumRequeues returns back how many failures the item has had
+	NumRequeues(item interface{}) int
 }

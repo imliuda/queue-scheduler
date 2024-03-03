@@ -1,4 +1,4 @@
-package queue
+package cache
 
 type States map[string]State
 

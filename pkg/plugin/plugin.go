@@ -23,7 +23,6 @@ import (
 	_ "github.com/imliuda/queue-scheduler/api/config/scheme"
 	schedulingv1alpha1 "github.com/imliuda/queue-scheduler/api/scheduling/v1alpha1"
 	schedulingcache "github.com/imliuda/queue-scheduler/pkg/cache"
-	"github.com/imliuda/queue-scheduler/pkg/queue"
 	"github.com/imliuda/queue-scheduler/pkg/webhook"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
@@ -46,7 +45,7 @@ var _ framework.PreFilterPlugin = &HierarchyQueue{}
 
 type HierarchyQueue struct {
 	handle      framework.Handle
-	queueStates *queue.States
+	queueStates *schedulingcache.States
 }
 
 func New(ctx context.Context, configuration runtime.Object, f framework.Handle) (framework.Plugin, error) {

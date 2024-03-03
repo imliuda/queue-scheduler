@@ -6,7 +6,6 @@ import (
 	"github.com/imliuda/queue-scheduler/api/scheduling/v1alpha1"
 	"github.com/imliuda/queue-scheduler/pkg/generated/clientset/versioned"
 	"github.com/imliuda/queue-scheduler/pkg/generated/informers/externalversions"
-	"github.com/imliuda/queue-scheduler/pkg/queue"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
@@ -16,7 +15,7 @@ import (
 
 type Cache struct {
 	queueInformer cache.SharedIndexInformer
-	queue         *queue.Queue
+	queue         *Queue
 	mu            sync.Mutex
 }
 
@@ -29,7 +28,7 @@ func NewCache(args *config.HierarchyQueueArgs, f framework.Handle) *Cache {
 	informer.AddEventHandler(cache)
 
 	cache.queueInformer = informer
-	cache.queue = queue.New()
+	cache.queue = NewRoot()
 
 	return cache
 }
@@ -58,9 +57,6 @@ func (c *Cache) OnUpdate(oldObj, newObj interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	switch newObj.(type) {
 	case *v1alpha1.QueueConfig:
 		q := newObj.(*v1alpha1.QueueConfig)
@@ -75,6 +71,13 @@ func (c *Cache) OnUpdate(oldObj, newObj interface{}) {
 func (c *Cache) OnDelete(obj interface{}) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
+	q := obj.(*v1alpha1.QueueConfig)
+	if q.Name == "queue-scheduler" {
+		c.queue.Reset()
+	} else {
+		klog.Info("QueueConfig config is not named queue-scheduler, will not update...")
+	}
 }
 
 func (c *Cache) Snapshot() {

@@ -14,24 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
-
-import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
-	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
-
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
-}
+// Package config contains functionality for interacting with
+// configuration for controller-runtime components.
+package config

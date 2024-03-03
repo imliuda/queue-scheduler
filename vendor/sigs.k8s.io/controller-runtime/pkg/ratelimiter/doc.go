@@ -14,24 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+/*
+Package ratelimiter defines rate limiters used by Controllers to limit how frequently requests may be queued.
 
-import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
-	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
-)
-
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
-}
+Typical rate limiters that can be used are implemented in client-go's workqueue package.
+*/
+package ratelimiter

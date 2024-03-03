@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,24 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+// Package builder wraps other controller-runtime libraries and exposes simple
+// patterns for building common Controllers.
+//
+// Projects built with the builder package can trivially be rebased on top of the underlying
+// packages if the project requires more customized behavior in the future.
+package builder
 
 import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
-	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
+	logf "sigs.k8s.io/controller-runtime/pkg/internal/log"
 )
 
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
-}
+var log = logf.RuntimeLog.WithName("builder")

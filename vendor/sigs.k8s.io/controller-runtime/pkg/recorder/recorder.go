@@ -1,5 +1,5 @@
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2018 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,24 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+// Package recorder defines interfaces for working with Kubernetes event recorders.
+//
+// You can use these to emit Kubernetes events associated with a particular Kubernetes
+// object.
+package recorder
 
 import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
-	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/client-go/tools/record"
 )
 
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
+// Provider knows how to generate new event recorders with given name.
+type Provider interface {
+	// NewRecorder returns an EventRecorder with given name.
+	GetEventRecorderFor(name string) record.EventRecorder
 }

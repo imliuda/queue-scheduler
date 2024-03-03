@@ -20,7 +20,7 @@ import (
 	"context"
 	"github.com/imliuda/queue-scheduler/api/config"
 	"github.com/imliuda/queue-scheduler/api/scheduling/v1alpha1"
-	"github.com/imliuda/queue-scheduler/pkg/queue"
+	"github.com/imliuda/queue-scheduler/pkg/cache"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
@@ -157,7 +157,7 @@ type QueueConfigValidator struct {
 
 func (q QueueConfigValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (warnings admission.Warnings, err error) {
 	newQ := obj.(*v1alpha1.QueueConfig)
-	root := queue.FromConfig(newQ)
+	root := cache.FromConfig(newQ)
 	if root.Validate() != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (q QueueConfigValidator) ValidateCreate(ctx context.Context, obj runtime.Ob
 
 func (q QueueConfigValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) (warnings admission.Warnings, err error) {
 	newQ := newObj.(*v1alpha1.QueueConfig)
-	root := queue.FromConfig(newQ)
+	root := cache.FromConfig(newQ)
 	if root.Validate() != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func Setup(ctx context.Context, schema *runtime.Scheme, args *config.HierarchyQu
 	//	return errors.Wrap(err, "check create CSR permission failed")
 	//}
 	//if !review.Status.Allowed {
-	//	return errors.New("no permission to create CSR")
+	//	return errors.NewRoot("no permission to create CSR")
 	//}
 	//
 	//certManager, err := NewCertificateManager(f.ClientSet())

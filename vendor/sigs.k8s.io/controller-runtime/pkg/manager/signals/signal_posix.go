@@ -1,5 +1,8 @@
+//go:build !windows
+// +build !windows
+
 /*
-Copyright 2020 The Kubernetes Authors.
+Copyright 2017 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,24 +17,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package signals
 
 import (
-	"github.com/imliuda/queue-scheduler/pkg/plugin"
-	"k8s.io/component-base/cli"
-	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/cmd/kube-scheduler/app"
 	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"syscall"
 )
 
-func main() {
-	ctrl.SetLogger(klog.Logger{})
-
-	command := app.NewSchedulerCommand(
-		app.WithPlugin("HierarchyQueue", plugin.New),
-	)
-
-	code := cli.Run(command)
-	os.Exit(code)
-}
+var shutdownSignals = []os.Signal{os.Interrupt, syscall.SIGTERM}
